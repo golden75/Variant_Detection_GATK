@@ -24,7 +24,7 @@ cd ../${d1}
 
 fastq-dump --split-files ${INPUT_FILE_NAME}
 </pre>
-The full script for slurm shedular can be found in the scripts folder by the name data_download.sh. <a href="/scripts/data_download.sh">here</a>
+The full script for slurm shedular can be found in the scripts folder by the name <a href="/scripts/data_download.sh">data_download.sh</a>.
 
 In this step we will download the paired-end interleveled fastq files from the NCBI SRA database. While downloading we will be splitting the fastq files into two fastq files; forward and reverse (R1 and R2)strand by using `--split-files` command, which gives us:
 
