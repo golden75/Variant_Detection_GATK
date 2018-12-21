@@ -162,3 +162,56 @@ Alignment will create SAM files, once the alignment is done for all the samples 
 ├── SRR1518158.sam
 └── SRR1518253.sam
 </pre>
+
+### SAM to BAM Conversion and Remove Singletons
+
+### SAM to BAM Conversion
+The BWA aligner will create the aligned files which is in the SAM format (Sequence Alignment/Map format). SAM files are human readable and can be large files. For the easy processing through the programs we will convert these files to binary format which is the BAM format using SAMtools.  
+
+So the code will look like:
+<pre>module load samtools/1.7
+samtools view -@ 8 -bS ${INPUT_FILE_NAME}.sam > ${INPUT_FILE_NAME}.bam </pre> 
+
+<pre>Useage: samtools view [options] 
+-@    number of treads
+-b    output in BAM format
+-S    input format auto detected
+</pre>
+
+This will create BAM format files:
+<pre>
+<strong>align/</strong>
+├── SRR1517848.bam
+├── SRR1517878.bam
+├── SRR1517884.bam
+├── SRR1517906.bam
+├── SRR1517991.bam
+├── SRR1518011.bam
+├── SRR1518158.bam
+└── SRR1518253.bam
+</pre>
+
+
+### Remove Singletons
+The unmapped reads are called singletons. The samtools flags can be used to remove these tagged reads.  
+Using the following command we will remove the singletons:
+<pre>
+module load samtools/1.7
+samtools view -@ 8 -F 0x04 -b ${INPUT_FILE_NAME}.bam > ${INPUT_FILE_NAME}_filtered.bam
+</pre>
+
+This will produce BAM files:
+<pre>
+<strong>align/</strong>
+├── SRR1517848_filtered.bam
+├── SRR1517878_filtered.bam
+├── SRR1517884_filtered.bam
+├── SRR1517906_filtered.bam
+├── SRR1517991_filtered.bam
+├── SRR1518011_filtered.bam
+├── SRR1518158_filtered.bam
+└── SRR1518253_filtered.bam
+</pre>
+
+The full slurm script for SAM to BAM conversion and singletons removal can be found at scripts folder by the name <a href="/scripts/singletons.sh">singletons.sh</a>
+
