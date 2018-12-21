@@ -215,3 +215,245 @@ This will produce BAM files:
 
 The full slurm script for SAM to BAM conversion and singletons removal can be found at scripts folder by the name <a href="/scripts/singletons.sh">singletons.sh</a>
 
+
+### Sort BAM files using PICARD
+
+Once the singletons removed the BAM files are sorted using PICARD tools. For GATK analysis the BAM files need to be correctly formatted as well. The correct formatting includes:
+* It must be aligned
+* It must be sorted in coordinate order
+* It must list the read groups with sample names in the header
+* Every read must belong to a read group.
+* The BAM file must pass Picard ValidateSamFile validation
+
+
+In order to pass the files into Picard for processing in this step we will sort the aligned reads in the coordinate order.
+
+The command is as follows:
+<pre>
+module load picard/2.9.2
+export _JAVA_OPTIONS=-Djava.io.tmpdir=/scratch
+
+java -jar $PICARD SortSam \
+        INPUT=${INPUT_FILE_NAME}_filtered.bam \
+        OUTPUT=${INPUT_FILE_NAME}_filtered_sort.bam \
+        SORT_ORDER=coordinate \
+        CREATE_INDEX=True
+</pre>
+
+The full script is called <a href="/scripts/picard_sort.sh">picard_sort.sh</a> and can be found at scripts folder.
+
+This will create sorted BAM format files:
+<pre>
+<strong>align/</strong>
+├── SRR1517848_filtered_sort.bam
+├── SRR1517878_filtered_sort.bam
+├── SRR1517884_filtered_sort.bam
+├── SRR1517906_filtered_sort.bam
+├── SRR1517991_filtered_sort.bam
+├── SRR1518011_filtered_sort.bam
+├── SRR1518158_filtered_sort.bam
+└── SRR1518253_filtered_sort.bam
+</pre>
+
+
+#### Tip
+After sorting your reads you can check whether the reads are sorted accordingly and does it have the `SO: coordinate` flag to satisfy the GATK requirements by using `samtools` command to check the Header:  
+`samtools view -H SRR1517848_filtered_sort.bam`   
+
+which will produce: 
+<pre>
+@HD	VN:1.5	SO:coordinate
+@SQ	SN:chr1	LN:249250621
+@SQ	SN:chr2	LN:243199373
+@SQ	SN:chr3	LN:198022430
+@SQ	SN:chr4	LN:191154276
+@SQ	SN:chr5	LN:180915260
+@SQ	SN:chr6	LN:171115067
+@SQ	SN:chr7	LN:159138663
+@SQ	SN:chrX	LN:155270560
+@SQ	SN:chr8	LN:146364022
+@SQ	SN:chr9	LN:141213431
+@SQ	SN:chr10	LN:135534747
+@SQ	SN:chr11	LN:135006516
+@SQ	SN:chr12	LN:133851895
+@SQ	SN:chr13	LN:115169878
+@SQ	SN:chr14	LN:107349540
+@SQ	SN:chr15	LN:102531392
+@SQ	SN:chr16	LN:90354753
+@SQ	SN:chr17	LN:81195210
+@SQ	SN:chr18	LN:78077248
+@SQ	SN:chr20	LN:63025520
+@SQ	SN:chrY	LN:59373566
+@SQ	SN:chr19	LN:59128983
+@SQ	SN:chr22	LN:51304566
+@SQ	SN:chr21	LN:48129895
+@SQ	SN:chr6_ssto_hap7	LN:4928567
+@SQ	SN:chr6_mcf_hap5	LN:4833398
+. 
+.
+</pre>
+
+
+### Remove PCR Duplicates using PICARD
+
+During the sequencing the same DNA molecules can be sequenced multiple times resulting in duplicates. These reads should not be counted as information in variant detection. In this step we will mark the duplicate reads and will remove them.  
+
+Following command will remove the duplicate reads from each sample file.
+<pre>
+d3=noduplicates
+module load picard/2.9.2
+export _JAVA_OPTIONS=-Djava.io.tmpdir=/scratch
+
+if [ ! -d ../${d3} ]; then
+       mkdir -p ../${d3}
+fi
+
+cd ../${d3}/
+
+java -jar $PICARD MarkDuplicates \
+        INPUT=../${d2}/${INPUT_FILE_NAME}_filtered_sort.bam \
+        OUTPUT=${INPUT_FILE_NAME}_nodup.bam \
+        REMOVE_DUPLICATES=Ture \
+        METRICS_FILE=${INPUT_FILE_NAME}_metrics.txt \
+        CREATE_INDEX=True
+</pre>
+The full script is called <a href="/scripts/markduplicates.sh">markduplicates.sh</a> and can be found at scripts folder.
+
+This will result in duplicates removed BAM files which will be:
+<pre>
+<strong>noduplicates/</strong>
+├── SRR1517848_metrics.txt
+├── SRR1517848_nodup.bai
+├── SRR1517848_nodup.bam
+├── SRR1517878_metrics.txt
+├── SRR1517878_nodup.bai
+├── SRR1517878_nodup.bam
+├── SRR1517884_metrics.txt
+├── SRR1517884_nodup.bai
+├── SRR1517884_nodup.bam
+├── SRR1517906_metrics.txt
+├── SRR1517906_nodup.bai
+├── SRR1517906_nodup.bam
+├── SRR1517991_metrics.txt
+├── SRR1517991_nodup.bai
+├── SRR1517991_nodup.bam
+├── SRR1518011_metrics.txt
+├── SRR1518011_nodup.bai
+├── SRR1518011_nodup.bam
+├── SRR1518158_metrics.txt
+├── SRR1518158_nodup.bai
+├── SRR1518158_nodup.bam
+├── SRR1518253_metrics.txt
+├── SRR1518253_nodup.bai
+└── SRR1518253_nodup.bam
+</pre>
+
+
+### Add Read Group Information
+
+In this section we will be adding meta data about the sample. Adding meta data is very important is downstream analysis of your data, and these information is visible to GATK analysis tools. In here we use the minimal read group information for the samples and some are important tags.
+
+In the SAM/BAM file the read group information is indicated in @RG tag which signify the "read group".
+
+* ID : globally unique string which identify this run. Usually this linked to the lane where the data was run.
+
+* SM : associated name in the DNA sample. This will be the sample identifier and it is the most important tag. In GATK all the analysis is done by sample, and this will selects which sample group it will belong to.
+
+* PL : platform used. eg: "Illumina", "Pacbio", "iontorrent"
+
+* LB : an identifier of the library from this DNA was sequenced. This field is important for future reference and quality control. In the case of errors associated with DNA preparation, this will link the data to the laboratory preparation step.
+
+* PU : platform unit identifier for the run. The generic identifier will allow to go back to the machine, time and where it was run. Usually this is a flowcell-barcode-lane unique identifier.
+
+To learn more about SAM tools tags please refer the [SAM tools format](http://samtools.github.io/hts-specs/SAMv1.pdf).
+
+The following Picard tools command will add the read group information to each sample.
+<pre>
+module load picard/2.9.2
+export _JAVA_OPTIONS=-Djava.io.tmpdir=/scratch
+
+cd ../${d4}
+
+java -jar $PICARD AddOrReplaceReadGroups \
+        INPUT=../${d3}/${INPUT_FILE_NAME}_nodup.bam \
+        OUTPUT=${INPUT_FILE_NAME}_rg.bam \
+        RGID=group1 \
+        RGSM=${INPUT_FILE_NAME} \
+        RGPL=illumina \
+        RGLB=1 \
+        RGPU=barcode \
+        CREATE_INDEX=True
+</pre>
+
+The full script is called <a href="/scripts/add_readgroups.sh">add_readgroups.sh</a> and can be found in scripts folder.
+The above command will add reads groups to each sample and will created BAM files:
+<pre>
+readgroup/
+├── SRR1517848_rg.bai
+├── SRR1517848_rg.bam
+├── SRR1517878_rg.bai
+├── SRR1517878_rg.bam
+├── SRR1517884_rg.bai
+├── SRR1517884_rg.bam
+├── SRR1517906_rg.bai
+├── SRR1517906_rg.bam
+├── SRR1517991_rg.bai
+├── SRR1517991_rg.bam
+├── SRR1518011_rg.bai
+├── SRR1518011_rg.bam
+├── SRR1518158_rg.bai
+├── SRR1518158_rg.bam
+├── SRR1518253_rg.bai
+└── SRR1518253_rg.bam
+</pre>
+
+#### How to check the reads have read group information ?
+You can do this by quick samtools and unix commands using:  
+`samtools view -H SRR1517848_rg.bam | grep '^@RG'`  
+which will give you:
+<pre>@RG	ID:group1	LB:1	PL:illumina	SM:SRR1517848	PU:barcode</pre>
+
+The presence of the `@RG` tags indicate the presence of read groups. Each read group has a `SM` tag, indicating the sample from which the reads belonging to that read group originate.
+
+In addition to the presence of a read group in the header, each read must belong to one and only one read group. Given the following example reads.
+
+
+### Reorder BAM file
+
+In this step we will reorder the SAM/BAM file to match the contig ordering in the reference fasta file, as to determine the exact name matching of contigs. Reads which are mapped to contigs which are absent in the new reference file are rejected or dropped. This step can run faster if we provide the indexed BAM file.
+
+The following command will reorder the BAM file using PICARD tools:
+<pre>
+module load picard/2.9.2
+export _JAVA_OPTIONS=-Djava.io.tmpdir=/scratch
+
+cd ../${d5}/
+
+java -jar $PICARD ReorderSam \
+        INPUT=../${d4}/${INPUT_FILE_NAME}_rg.bam \
+        OUTPUT=${INPUT_FILE_NAME}_karyotype.bam \
+        REFERENCE=${hg19} \
+        CREATE_INDEX=True
+</pre>
+
+This will create karyotype BAM files:
+<pre>
+<strong>reorder/</strong>
+├── SRR1517848_karyotype.bai
+├── SRR1517848_karyotype.bam
+├── SRR1517878_karyotype.bai
+├── SRR1517878_karyotype.bam
+├── SRR1517884_karyotype.bai
+├── SRR1517884_karyotype.bam
+├── SRR1517906_karyotype.bai
+├── SRR1517906_karyotype.bam
+├── SRR1517991_karyotype.bai
+├── SRR1517991_karyotype.bam
+├── SRR1518011_karyotype.bai
+├── SRR1518011_karyotype.bam
+├── SRR1518158_karyotype.bai
+├── SRR1518158_karyotype.bam
+├── SRR1518253_karyotype.bai
+└── SRR1518253_karyotype.bam
+</pre>
+
