@@ -68,7 +68,7 @@ module load bwa/0.7.17
 cd ../hg19/
 bwa index ${hg19}
 </pre>
-The full slurm script for creating the index can be found at scripts folder by the name, <a href="/scripts/bwa_index.sh">bwa_index.sh</a>
+The full slurm script for creating the index can be found at scripts folder by the name, <a href="/scripts/bwa_index.sh">bwa_index.sh</a> .
 
 This will create the following files:
 <pre>
