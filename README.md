@@ -16,7 +16,8 @@ This repository is a usable, publicly available tutorial for analyzing different
     <li><a href="#Header_9"> 9. Reorder BAM file</>
     <li><a href="#Header_10"> 10. Variant Calling</>
 </ul>
-</div>
+</div> . 
+
 
 
 ### Introduction to Variant Detection using Whole Exome Sequencing 
