@@ -436,6 +436,7 @@ java -jar $PICARD ReorderSam \
         CREATE_INDEX=True
 </pre>
 
+The full script is called <a href="/scripts/reorder.sh">reorder.sh</a> and can be found in scripts folder.
 This will create karyotype BAM files:
 <pre>
 <strong>reorder/</strong>
@@ -455,5 +456,44 @@ This will create karyotype BAM files:
 ├── SRR1518158_karyotype.bam
 ├── SRR1518253_karyotype.bai
 └── SRR1518253_karyotype.bam
+</pre>
+
+
+### Variant Calling 
+
+In this step we will call the variants using HaplotypeCaller in GATK software. 
+
+<pre>
+module load GATK/4.0
+export _JAVA_OPTIONS=-Djava.io.tmpdir=/scratch
+
+cd ../${d6}/ 
+
+gatk HaplotypeCaller \
+        --reference ${hg19} \
+        --input ../${d5}/${INPUT_FILE_NAME}_karyotype.bam \
+        --output ${INPUT_FILE_NAME}_haplotype.vcf
+</pre>
+
+The full script is called <a href="/scripts/haplotypeCaller.sh">haplotypeCaller.sh</a> and can be found in scripts folder.
+This creates a VCF file called ${INPUT_FILE_NAME}_haplotype.vcf, containing all the variant sites the HaplotypeCaller evaluate including both SNPs and Indels.
+<pre>
+<strong>haplotypes/</strong>
+├── SRR1517848_haplotype.vcf
+├── SRR1517848_haplotype.vcf.idx
+├── SRR1517878_haplotype.vcf
+├── SRR1517878_haplotype.vcf.idx
+├── SRR1517884_haplotype.vcf
+├── SRR1517884_haplotype.vcf.idx
+├── SRR1517906_haplotype.vcf
+├── SRR1517906_haplotype.vcf.idx
+├── SRR1517991_haplotype.vcf
+├── SRR1517991_haplotype.vcf.idx
+├── SRR1518011_haplotype.vcf
+├── SRR1518011_haplotype.vcf.idx
+├── SRR1518158_haplotype.vcf
+├── SRR1518158_haplotype.vcf.idx
+├── SRR1518253_haplotype.vcf
+└── SRR1518253_haplotype.vcf.idx
 </pre>
 
