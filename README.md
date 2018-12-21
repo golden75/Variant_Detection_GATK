@@ -124,3 +124,41 @@ hg19/
 
 This is formated like a SAM file header and when running GATK it automatically looks for these files.
 
+### Aligning of Reads
+
+Using BWA aligner we are going to align the reads to the reference fasta file.  
+
+Since we have paired-end reads command will look like:
+<pre>
+d1=raw_data
+d2=align
+
+if [ ! -d ../${d2} ]; then
+        mkdir -p ../${d2}
+fi
+
+cd ../${d2}
+
+module load bwa/0.7.17
+bwa mem -t 8 ${hg19} ../${d1}/${INPUT_FILE_NAME}${R1} ../${d1}/${INPUT_FILE_NAME}${R2} -o ${INPUT_FILE_NAME}.sam
+</pre>
+The full scrip is called <a href="/scripts/align.sh">align.sh</a> and can be found in the scripts folder.
+
+<pre>
+Usage: bwa mem [options] reference.fasta read1.fa read2.fa -o outputname.sam
+mem    The BWA-MEM algorithm performs local alignment  
+-t     Number of threads  
+</pre>
+
+Alignment will create SAM files, once the alignment is done for all the samples we will end up with:
+<pre>
+<strong>align</strong>/
+├── SRR1517848.sam
+├── SRR1517878.sam
+├── SRR1517884.sam
+├── SRR1517906.sam
+├── SRR1517991.sam
+├── SRR1518011.sam
+├── SRR1518158.sam
+└── SRR1518253.sam
+</pre>
