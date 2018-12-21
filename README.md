@@ -49,19 +49,77 @@ raw_data/
 </pre>
 
 
+### Preparing the Reference Sequence
+The GATK needs two files when accessing the reference file:  
+* A dictionary of the contig names and sizes
+* An index file to access the reference fasta file bases
+
+In here we are preparing these files upfront so the GATK will be able to use the FASTA file as a reference.
+
+### Generate the BWA index  
+
+First run the following bwa command to create the index, given that you have reference hg19.fa file already downloaded in to the folder called `hg19`  
+
 <pre style="color: silver; background: black;">
-d1="raw_data"
+hg19= < full_path_to >hg19.fa
 
-cd ../${d1}
+module load bwa/0.7.17
 
-module load sratoolkit/2.8.2
-
-list="SRR796868 SRR796869 SRR796870 SRR796871 SRR796872 
-SRR796873 SRR796874 SRR796875 SRR796876 SRR796877 
-SRR796878 SRR796879 SRR796880 SRR796881 SRX265476"
-
-for file in $list; do
-        echo $file
-        fastq-dump --split-files $file
-done
+cd ../hg19/
+bwa index ${hg19}
 </pre>
+The full slurm script for creating the index can be found at scripts folder by the name, <a href="/scripts/bwa_index.sh">bwa_index.sh</a> .
+
+This will create the following files:
+<pre>
+hg19/
+├── hg19.fa
+├── hg19.fa.amb
+├── hg19.fa.ann
+├── hg19.fa.bwt
+├── hg19.fa.pac
+└── hg19.fa.sa
+</pre>
+
+
+### Generate Fasta File Index  
+Using `samtools` we will create a index of the reference fasta file.  
+<pre>
+module load samtools/1.7
+samtools faidx ${hg19}
+</pre>
+
+This will create:
+<pre>
+hg19/
+└── hg19.fa.fai
+</pre>
+
+It will consist of one record per line for each of the contigs in the fasta file. Where each record is composed of 
+* contig name
+* size
+* location
+* bases per lane
+* bytes per lane
+
+
+### Create Sequence Dictionary
+Use the picard tools to create the dictionary by the following command:
+<pre>
+module load picard/2.9.2
+export _JAVA_OPTIONS=-Djava.io.tmpdir=/scratch
+
+java -jar $PICARD CreateSequenceDictionary \
+        REFERENCE=${hg19} \
+        OUTPUT=hg19.dict \
+        CREATE_INDEX=True
+</pre>
+
+This will create:
+<pre>
+hg19/
+└── hg19.dict
+</pre>
+
+This is formated like a SAM file header and when running GATK it automatically looks for these files.
+
