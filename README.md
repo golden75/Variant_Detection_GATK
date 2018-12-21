@@ -88,7 +88,7 @@ Using `samtools` we will create a index of the reference fasta file.
 module load samtools/1.7
 samtools faidx ${hg19}
 </pre>
-
+The full slurm script for creating the index can be found at scripts folder by the name, <a href="/scripts/fasta_index.sh">fasta_index.sh</a>.
 This will create:
 <pre>
 hg19/
@@ -114,6 +114,7 @@ java -jar $PICARD CreateSequenceDictionary \
         OUTPUT=hg19.dict \
         CREATE_INDEX=True
 </pre>
+The full slurm script for creating the dictionary can be found at scripts folder by the name, <a href="/scripts/dictionary.sh">dictionary.sh</a>.
 
 This will create:
 <pre>
