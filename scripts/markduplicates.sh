@@ -2,7 +2,7 @@
 #SBATCH --job-name=remove_duplicates
 #SBATCH -n 1
 #SBATCH -N 1
-#SBATCH -c 8
+#SBATCH -c 1
 #SBATCH --mem=30G
 #SBATCH --partition=general
 #SBATCH --qos=general
@@ -31,6 +31,7 @@ echo "SLURM_ARRAY_TASK_ID : " $SLURM_ARRAY_TASK_ID
 ##################################################################
 ## Mark Duplicates    
 ##################################################################
+echo "=== Mark Duplicates starts `date` ==="
 module load picard/2.9.2
 export _JAVA_OPTIONS=-Djava.io.tmpdir=/scratch
 
