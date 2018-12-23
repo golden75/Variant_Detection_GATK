@@ -2,7 +2,7 @@
 #SBATCH --job-name=add_readgroup
 #SBATCH -n 1
 #SBATCH -N 1
-#SBATCH -c 8
+#SBATCH -c 1
 #SBATCH --mem=30G
 #SBATCH --partition=general
 #SBATCH --qos=general
@@ -31,6 +31,7 @@ echo "SLURM_ARRAY_TASK_ID : " $SLURM_ARRAY_TASK_ID
 ##################################################################
 ## Add read group  
 ##################################################################
+echo "Add read group start `date` ==="
 module load picard/2.9.2
 export _JAVA_OPTIONS=-Djava.io.tmpdir=/scratch
 
