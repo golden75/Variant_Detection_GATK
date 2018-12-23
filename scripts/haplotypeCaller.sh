@@ -2,7 +2,7 @@
 #SBATCH --job-name=haplotypeCaller
 #SBATCH -n 1
 #SBATCH -N 1
-#SBATCH -c 8
+#SBATCH -c 1
 #SBATCH --mem=30G
 #SBATCH --partition=general
 #SBATCH --qos=general
@@ -12,7 +12,7 @@
 #SBATCH -o ../log_files/%x_%A_%a.out
 #SBATCH -e ../log_files/%x_%A_%a.err
 
-hg19=/home/FCAM/nperera/Tutorial/variant_detection_GATK/Illumina/Analysis_2/hg19/hg19.fa
+hg19=/home/FCAM/nperera/Tutorial/variant_detection_GATK/Illumina/hg19/hg19.fa
 R1="_1.fastq"
 R2="_2.fastq"
 
@@ -33,6 +33,7 @@ echo "SLURM_ARRAY_TASK_ID : " $SLURM_ARRAY_TASK_ID
 ##################################################################
 ## Haplotype Caller
 ##################################################################
+echo "Haplotype Caller start `date` ==="
 
 if [ ! -d ../${d6} ]; then
        mkdir -p ../${d6}
