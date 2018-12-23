@@ -43,7 +43,7 @@ fi
 cd ../${d5}
 
 
-eva -jar $PICARD ReorderSam \
+java -jar $PICARD ReorderSam \
         INPUT=../${d4}/${INPUT_FILE_NAME}_rg.bam \
         OUTPUT=${INPUT_FILE_NAME}_karyotype.bam \
         REFERENCE=${hg19} \
