@@ -30,7 +30,7 @@ echo "SLURM_ARRAY_TASK_ID : " $SLURM_ARRAY_TASK_ID
 ##################################################################
 ## Align using bwa 
 ##################################################################
-echo "=========== Align of reads :: ${INPUT_FILE_NAME}  ================="
+echo "=========== Align of reads :: ${INPUT_FILE_NAME}  `date` ================="
 
 module load bwa/0.7.17
 
