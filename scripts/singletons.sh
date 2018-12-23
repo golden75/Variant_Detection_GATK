@@ -12,7 +12,7 @@
 #SBATCH -o ../log_files/%x_%A_%a.out
 #SBATCH -e ../log_files/%x_%A_%a.err
 
-hg19=/home/FCAM/nperera/Tutorial/variant_detection_GATK/Illumina/Analysis_2/hg19/hg19.fa
+hg19=/home/FCAM/nperera/Tutorial/variant_detection_GATK/Illumina/hg19/hg19.fa
 R1="_1.fastq"
 R2="_2.fastq"
 
@@ -37,13 +37,15 @@ cd ../${d2}
 ##################################################################
 ## SAM to BAM
 ##################################################################
+echo "=== SAM to BAM `date` ===
 module load samtools/1.7
 samtools view -@ 8 -bS ${INPUT_FILE_NAME}.sam > ${INPUT_FILE_NAME}.bam
 echo "bam file created for ${INPUT_FILE_NAME} `date`"
 
 ##################################################################
 ## Remove sigletons
-################################################################## 
+##################################################################
+echo "=== Remove singletons `date` ==="
 samtools view -@ 8 -F 0x04 -b ${INPUT_FILE_NAME}.bam > ${INPUT_FILE_NAME}_filtered.bam
 echo "sigletons removed for ${INPUT_FILE_NAME} `date`"
 module unload samtools/1.7
