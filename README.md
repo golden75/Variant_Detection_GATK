@@ -406,7 +406,7 @@ java -jar $PICARD AddOrReplaceReadGroups \
         CREATE_INDEX=True
 </pre>
 
-The full script is called <a href="/scripts/add_readgroups.sh">add_readgroups.sh</a> and can be found in scripts folder.
+The full script is called <a href="/scripts/add_readgroup.sh">add_readgroup.sh</a> and can be found in scripts folder.
 The above command will add reads groups to each sample and will created BAM files:
 <pre>
 readgroup/
