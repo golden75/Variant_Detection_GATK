@@ -9,8 +9,8 @@
 #SBATCH --array=[1-8]%8
 ##SBATCH --mail-type=ALL
 ##SBATCH --mail-user=first.last@uconn.edu
-#SBATCH -o ../log_files/%x_%A.out
-#SBATCH -e ../log_files/%x_%A.err
+#SBATCH -o ../log_files/%x_%A_%a.out
+#SBATCH -e ../log_files/%x_%A_%a.err
 
 d1="raw_data"
 
